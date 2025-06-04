@@ -1,0 +1,7 @@
+FROM node:18-alpine
+WORKDIR /app
+COPY server.js .
+COPY package.json .
+RUN mkdir -p audios
+EXPOSE 3000
+CMD ["node", "server.js"]

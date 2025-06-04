@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: bdockerfile
+    container_name: audio-backend
+    volumes:
+      - ./audios:/app/audios
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: fdockerfile
+    container_name: audio-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

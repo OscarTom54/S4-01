@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collecteur d'enregistrements audio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Session d'enregistrement</h1>
+    <div id="session-info"></div>
+
+    <div id="phrase-container">
+      <p id="phrase-text">...</p>
+      <button id="record-btn">Commencer l'enregistrement</button>
+      <button id="stop-btn" disabled>Terminer l'enregistrement</button>
+      <button id="playback-btn" disabled>Lire l'enregistrement</button>
+      <button id="save-btn" disabled>Sauvegarder</button>
+      <button id="next-btn" disabled>Phrase suivante</button>
+    </div>
+
+    <button id="end-session-btn">Finir la session</button>
+  </div>
+
+  <script>
+    // todo fuchier a part
+    const SENTENCES = [
+        "Phrase1",
+        "Phrase2",
+        "Phrase3",
+        "Phrase4",
+        "Phrase5",
+        "Phrase6",
+        "Phrase7",
+        "Phrase8",
+        "Phrase9",
+        "Phrase10"
+    ];
+
+    const phraseTextEl = document.getElementById('phrase-text');
+    const recordBtn = document.getElementById('record-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const playbackBtn = document.getElementById('playback-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const endSessionBtn = document.getElementById('end-session-btn');
+    const sessionInfoEl = document.getElementById('session-info');
+
+    let nbPhrases = parseInt(sessionStorage.getItem('nb-phrases')) || 5;
+    let userId = sessionStorage.getItem('userId') || `guest_${Date.now()}`;
+    let nCurrPhrase = 0;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let audioBlob = null;
+    let audioUrl = null;
+    let audioElement = null;
+
+    function initSession() {
+      sessionInfoEl.textContent = `UID: ${userId} · Phrase ${nCurrPhrase + 1} sur ${nbPhrases}`;
+      loadPhrase();
+    }
+
+    function loadPhrase() {
+      if (nCurrPhrase >= nbPhrases) {
+        alert('Fin de la session');
+        endSession();
+        return;
+      }
+
+      const phrase = SENTENCES[nCurrPhrase % SENTENCES.length]; // TODO rdm
+      phraseTextEl.textContent = phrase;
+
+      // Reset
+      recordBtn.disabled = false;
+      stopBtn.disabled = true;
+      playbackBtn.disabled = true;
+      saveBtn.disabled = true;
+      nextBtn.disabled = true;
+      audioChunks = [];
+      audioBlob = null;
+      if (audioElement) {
+        audioElement.remove();
+        audioElement = null;
+      }
+      sessionInfoEl.textContent = `UID: ${userId} · Phrase ${nCurrPhrase + 1} sur ${nbPhrases}`;
+    }
+
+    recordBtn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.addEventListener('dataavailable', (e) => {
+          audioChunks.push(e.data);
+        });
+
+        mediaRecorder.addEventListener('stop', () => {
+          audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          audioUrl = URL.createObjectURL(audioBlob);
+          playbackBtn.disabled = false;
+          saveBtn.disabled = false;
+          stream.getTracks().forEach((track) => track.stop());
+        });
+
+        mediaRecorder.start();
+        recordBtn.disabled = true;
+        stopBtn.disabled = false;
+      } catch (err) {
+        console.error('Acces micro compromis:', err);
+        alert('Le site à besoin d\'accéder au microphone.');
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        stopBtn.disabled = true;
+      }
+    });
+
+    playbackBtn.addEventListener('click', () => {
+      if (!audioBlob) return;
+      if (audioElement) {
+        audioElement.remove();
+      }
+      audioElement = new Audio(audioUrl);
+      audioElement.controls = true;
+      document.getElementById('phrase-container').appendChild(audioElement);
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      if (!audioBlob) return;
+      saveBtn.disabled = true;
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.wav');
+
+      // ajax
+      try {
+        const response = await fetch(
+          `/upload?userId=${encodeURIComponent(userId)}&phrase=${nCurrPhrase + 1}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'audio/wav'
+            },
+            body: audioBlob
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`réponse serveur :  ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('upload terminé:', data);
+        alert(`Enregistrement sauvegardé ${nCurrPhrase + 1}`);
+        nextBtn.disabled = false;
+      } catch (err) {
+        console.error('erreur d\'upload :', err);
+        alert('Echec de l\'enregistrement.');
+        saveBtn.disabled = false;
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nCurrPhrase += 1;
+      loadPhrase();
+    });
+
+    // fin de session avant nphrases
+    endSessionBtn.addEventListener('click', () => {
+      const confirmLeave = confirm('Terminer la session prématurément ?');
+      if (confirmLeave) {
+        endSession();
+      }
+    });
+
+    function endSession() {
+        // clear
+      sessionStorage.removeItem('age');
+      sessionStorage.removeItem('genre');
+      sessionStorage.removeItem('nbPhrases');
+      sessionStorage.removeItem('userId');
+      window.location.href = 'index.html';
+    }
+
+    initSession();
+  </script>
+</body>
+</html>

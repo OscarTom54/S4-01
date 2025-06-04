@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enregistreur audio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Formulaire d'utilisation</h1>
+    <form id="consent-form">
+      <label>
+        Age:
+        <input type="number" id="age" name="age" min="18" max="100" required />
+      </label>
+
+      <label>
+        Genre:
+        <select id="genre" name="genre" required>
+          <option value="">Genre</option>
+          <option value="male">Homme</option>
+          <option value="female">Femme</option>
+        </select>
+      </label>
+
+      <label>
+        Nombre de phrases:
+        <input type="number" id="nb-phrases" name="nb-phrases" min="1" max="10" value="3" required />
+      </label>
+      <label class="consent">
+        <input type="checkbox" id="consent" name="consent" required /> <!--texte de consentement-->
+        texte de consentement ici. 
+      </label>
+
+      <button type="submit">Commencer la session d'enregistrement</button>
+    </form>
+  </div>
+
+
+  <script>
+    document.getElementById('consent-form').addEventListener('submit', (e) => {
+      e.preventDefault(); // bloque si le genre est encore sur "Select"
+      const age = document.getElementById('age').value;
+      const genre = document.getElementById('genre').value;
+      const nbPhrases = document.getElementById('nb-phrases').value;
+      const consent = document.getElementById('consent').checked;
+
+      if (!consent) {
+        alert('Veuillez accepter les conditions d\'utilisation');
+        return;
+      }
+
+      sessionStorage.setItem('age', age);
+      sessionStorage.setItem('genre', genre);
+      sessionStorage.setItem('nb-phrases', nbPhrases);
+      sessionStorage.setItem('userId', `${genre}_${age}_${Date.now()}`); 
+
+      window.location.href = 'record.html';
+    });
+  </script>
+</body>
+</html>
