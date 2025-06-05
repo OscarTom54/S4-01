@@ -5,6 +5,7 @@ const path = require('path');
 const PORT = process.env.PORT || 3000; // + ':' ?
 const AUDIOS_DIR = path.join(__dirname, 'audios');
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const PHRASES_FILE = path.join(__dirname, 'phrases.txt');
 
 if (!fs.existsSync(AUDIOS_DIR)) {
   fs.mkdirSync(AUDIOS_DIR, { recursive: true }); // crée /audios
@@ -75,6 +76,20 @@ const server = http.createServer((req, res) => {
       res.end('Server Error');
     });
 
+    return;
+  }
+
+  if (method === 'GET' && url === '/phrases') {
+    fs.readFile(PHRASES_FILE, 'utf8', (err, data) => {
+      if (err) {
+        res.writeHead(500);
+        res.end('Erreur chargement des phrase');
+        return;
+      }
+      const phrases = data.split('\n').filter(Boolean); // enlève la dernière ligne
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(phrases));
+    });
     return;
   }
 

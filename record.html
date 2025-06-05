@@ -24,19 +24,7 @@
   </div>
 
   <script>
-    // todo fuchier a part
-    const SENTENCES = [
-        "Phrase1",
-        "Phrase2",
-        "Phrase3",
-        "Phrase4",
-        "Phrase5",
-        "Phrase6",
-        "Phrase7",
-        "Phrase8",
-        "Phrase9",
-        "Phrase10"
-    ];
+    let phrases = [];
 
     const phraseTextEl = document.getElementById('phrase-text');
     const recordBtn = document.getElementById('record-btn');
@@ -56,8 +44,23 @@
     let audioUrl = null;
     let audioElement = null;
 
-    function initSession() {
+    async function loadSessionPhrases() {
+      try {
+        const res = await fetch('/phrases');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const allPhrases = await res.json();
+        const shuffled = allPhrases.sort(() => 0.5 - Math.random());
+        phrases = shuffled.slice(0, nbPhrases);
+      } catch (err) {
+        console.error('Erreur pendant la récupération des phrases', err);
+        alert('Erreur pendant la récupération des phrases.');
+      }
+    }
+
+
+    async function initSession() {
       sessionInfoEl.textContent = `UID: ${userId} · Phrase ${nCurrPhrase + 1} sur ${nbPhrases}`;
+      await loadSessionPhrases();
       loadPhrase();
     }
 
@@ -68,7 +71,7 @@
         return;
       }
 
-      const phrase = SENTENCES[nCurrPhrase % SENTENCES.length]; // TODO rdm
+      const phrase = phrases[nCurrPhrase];
       phraseTextEl.textContent = phrase;
 
       // Reset

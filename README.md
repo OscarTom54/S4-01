@@ -28,6 +28,7 @@ Le fichier docker-compose.yml lie les ports 3000 et 80 des containeurs aux ports
 
 # Structure
 
+```
 .
 ├── audios/                  # Dossier où sont enregistrés les fichiers audios (.wav).
     ├── genre_age_timestamp_nphrase.wav
@@ -41,7 +42,7 @@ Le fichier docker-compose.yml lie les ports 3000 et 80 des containeurs aux ports
 ├── nginx.conf               # Fichier de configuration Nginx afin de rediriger les requêtes d'uploads vers le backend
 ├── package.json             # Fichier nécéssaire pour Node.js, contient la commande afin de lancer le serveur backend
 ├── README.md                # Documentation du projet
-
+```
 
 ---
 
@@ -51,5 +52,5 @@ Le fichier docker-compose.yml lie les ports 3000 et 80 des containeurs aux ports
 
 # Phrases
 
-todo phrases fichier a part
 todo todos
+fix readme structure
