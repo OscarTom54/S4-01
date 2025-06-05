@@ -42,15 +42,24 @@ Le fichier docker-compose.yml lie les ports 3000 et 80 des containeurs aux ports
 ├── nginx.conf               # Fichier de configuration Nginx afin de rediriger les requêtes d'uploads vers le backend
 ├── package.json             # Fichier nécéssaire pour Node.js, contient la commande afin de lancer le serveur backend
 ├── README.md                # Documentation du projet
+├── phrases.txt              # Fichier contenant toutes les phrases, séparées par un saut de ligne
 ```
 
 ---
 
 # Déploiement
+Pour un déploiement contenarisé avec docker, simplement lancer la commande :
+docker compose up --build
 
-# Sécurité
+L'application sera ensuite accessible à l'adresse suivante :
+http://localhost:8080
+
+Puis pour arrêter l'application :
+docker compose down
+
+Les enregistrements seront disponibles dans le répertoire `./audios` de la machine hôte
+
 
 # Phrases
-
-todo todos
-fix readme structure
+Le fichier phrases.txt contient 100 phrases fournies par mon camarade Nathan Eyer.
+Les phrases proposées lors d'une session sont selectionnées aléatoirement à l'envoie du formulaire.

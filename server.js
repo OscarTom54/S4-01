@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs'); // filesystem
 const path = require('path');
 
-const PORT = process.env.PORT || 3000; // + ':' ?
+const PORT = process.env.PORT || 3000;
 const AUDIOS_DIR = path.join(__dirname, 'audios');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PHRASES_FILE = path.join(__dirname, 'phrases.txt');
@@ -58,7 +58,7 @@ const server = http.createServer((req, res) => {
     const nPhrase = queryParams.get('phrase') || '0';
 
     const timestamp = Date.now();
-    const UID = userId.replace(/[^a-zA-Z0-9_-]/g, '_'); // TODO facto
+    const UID = userId.replace(/[^a-zA-Z0-9_-]/g, '_');
     const filename = `${UID}_p${nPhrase}.wav`;
     const filepath = path.join(AUDIOS_DIR, filename);
 
@@ -67,7 +67,7 @@ const server = http.createServer((req, res) => {
 
     writeStream.on('finish', () => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Upload successful', filename }));
+      res.end(JSON.stringify({ message: 'Upload terminé', filename }));
     });
 
     writeStream.on('error', (err) => {

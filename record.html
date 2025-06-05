@@ -46,9 +46,10 @@
 
     async function loadSessionPhrases() {
       try {
-        const res = await fetch('/phrases');
+        const res = await fetch('/phrases.txt');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const allPhrases = await res.json();
+        const text = await res.text();
+        const allPhrases = text.split('\n').filter(Boolean);
         const shuffled = allPhrases.sort(() => 0.5 - Math.random());
         phrases = shuffled.slice(0, nbPhrases);
       } catch (err) {
